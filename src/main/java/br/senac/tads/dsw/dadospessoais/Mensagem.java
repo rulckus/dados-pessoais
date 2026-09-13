@@ -9,4 +9,11 @@ public class Mensagem {
 		this.texto = texto;
 	}
 
+	public String getNome() {
+		return nome;
+	}
+
+	public String getTexto() {
+		return texto;
+	}
 }
