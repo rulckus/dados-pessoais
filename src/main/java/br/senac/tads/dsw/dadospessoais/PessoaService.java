@@ -37,5 +37,11 @@ public class PessoaService {
 		return Optional.ofNullable(mapPessoas.get(username));
 	}
 
+	public Pessoa incluirNovaPessoa(Pessoa pessoa){
+		pessoa.setId(contador.incrementAndGet());
+		mapPessoas.put(pessoa.getUsername(), pessoa);
+		return pessoa;
+	}
+
 
 }

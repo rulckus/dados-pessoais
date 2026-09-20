@@ -1,10 +1,14 @@
 package br.senac.tads.dsw.dadospessoais;
 
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,4 +35,30 @@ public class PessoaController {
 		}
 		return optPessoa.get();
 	}
+
+	@PostMapping("/sem-validacao")
+	public ResponseEntity<?> incluiNovo(@RequestBody Pessoa pessoa){
+		pessoaService.incluirNovaPessoa(pessoa);
+		URI location = ServletUriComponentsBuilder
+			.fromCurrentContextPath()
+			.path("/pessoas/{username}")
+			.buildAndExpand(pessoa.getUsername())
+			.toUri();
+
+		return ResponseEntity.created(location).build();
+	}
+
+	@PostMapping
+	public ResponseEntity<?> incluiNovoComValidacao(@RequestBody @Valid Pessoa pessoa){
+		pessoaService.incluirNovaPessoa(pessoa);
+		URI location = ServletUriComponentsBuilder
+			.fromCurrentContextPath()
+			.path("/pessoas/{username}")
+			.buildAndExpand(pessoa.getUsername())
+			.toUri();
+
+		return ResponseEntity.created(location).build();
+	}
+
+
 }
