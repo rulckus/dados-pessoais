@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ConhecimentoRepository extends JpaRepository<ConhecimentoEntity, Integer> {
 
-	
+
 	Optional<ConhecimentoEntity> findByNomeIgnoreCase(String nome);
 }
