@@ -51,7 +51,7 @@ public class PessoaController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> incluiNovoComValidacao(@RequestBody @Valid PessoaDto pessoa){
+	public ResponseEntity<?> incluiNovoComValidacao(@RequestBody @Valid PessoaDto pessoa) {
 		pessoaService.incluirNovaPessoa(pessoa);
 		URI location = ServletUriComponentsBuilder
 			.fromCurrentContextPath()
@@ -61,7 +61,6 @@ public class PessoaController {
 
 		return ResponseEntity.created(location).build();
 	}
-
 
 	@PutMapping("/{username}")
 	public ResponseEntity<?> atualizar(@PathVariable("username") String username,

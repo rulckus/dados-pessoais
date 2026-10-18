@@ -15,7 +15,7 @@
   <table>
     <thead>
     <tr>
-      <th>ID</th><th>Nome</th><th>Username</th><th>E-mail</th>
+      <th>ID</th><th>Nome</th><th>Username</th><th>E-mail</th><th>Ações</th>
     </tr>
     </thead>
     <tbody id="corpoTabela"></tbody>
@@ -40,6 +40,40 @@
   </article>
 </section>
 
+<hr />
+
+<section id="secaoEdicao" style="display:none">
+  <h2>Editar pessoa: <span id="editUsername"></span> </h2>
+  <form id="formEdicao">
+    <div>
+      <label for="editNome">Nome:</label>
+      <input type="text" id="editNome" required>
+    </div>
+    <div>
+      <label for="editEmail">Email:</label>
+      <input type="email" id="editEmail" required>
+    </div>
+    <div>
+      <label for="editTelefone">Telefone:</label>
+      <input type="text" id="editTelefone" required>
+    </div>
+    <div>
+      <label for="editDataNascimento">Data de Nascimento:</label>
+      <input type="date" id="editDataNascimento" required>
+    </div>
+    <div>
+      <strong>Conhecimentos:</strong><br />
+      <label><input type="checkbox" name="editConhecimentos" value="Java"/>Java</label> <br/>
+      <label><input type="checkbox" name="editConhecimentos" value="Spring Boot"/>Spring Boot</label> <br/>
+      <label><input type="checkbox" name="editConhecimentos" value="JavaScript"/>JavaScript</label> <br/>
+      <label><input type="checkbox" name="editConhecimentos" value="Angular"/>Angular</label> <br/>
+      <label><input type="checkbox" name="editConhecimentos" value="React"/>React</label> <br/>
+    </div>
+    <button id="submit">Salvar alterações</button>
+    <button id="button" onclick="fecharFormEdicao()">Cancelar</button>
+  </form>
+</section>
+
 <script>
   // Buscar e exibir a lista de pessoas
   document.getElementById('btnListar').addEventListener('click', async () => {
@@ -58,6 +92,10 @@
               <td>${p.nome}</td>
               <td>${p.username}</td>
               <td>${p.email}</td>
+              <td>
+              <button onclick="abrirFormEdicao('${p.username}')">Editar</button>
+              <button onclick="excluirPessoa('${p.username}')">Excluir</button>
+            </td>
             </tr>`
         );
       }
@@ -88,6 +126,83 @@
   document.getElementById('btnFulano').addEventListener('click', () => getPessoa('fulano'))
   document.getElementById('btnCiclano').addEventListener('click', () => getPessoa('ciclano'))
   document.getElementById('btnBeltrana').addEventListener('click', () => getPessoa('beltrana'))
+
+  async function abrirFormEdicao(username){
+    const httpResp = await fetch(`/pessoas/${username}`);
+    if(!httpResp.ok){
+      alert('Não foi possível carregar os dados para edição.');
+      return
+    }
+    const p = await httpResp.json();
+
+    document.getElementById('editUsername').textContent = username;
+    document.getElementById('editNome').value = p.nome;
+    document.getElementById('editEmail').value = p.email;
+    document.getElementById('editTelefone').value = p.telefone ?? '';
+    document.getElementById('editDataNascimento').value = p.dataNascimento;
+
+    //Marca apenas os checkboxes que a pessoa já possui
+    const checkboxes = document.querySelectorAll('[name="editConhecimentos"]');
+    for (const cb of checkboxes){
+      cb.checked = p.conhecimentos && p.conhecimentos.includes(cb.value);
+    }
+
+    //Armazena o username no formulário para usar no submit
+    document.getElementById('formEdicao').dataset.username = username;
+    document.getElementById('secaoEdicao').style.display = 'block';
+  }
+
+  function fecharFormEdicao(){
+    document.getElementById('secaoEdicao').style.display = 'none';
+  }
+
+  document.getElementById('formEdicao').addEventListener('submit', async (evt) => {
+    evt.preventDefault();
+    const username = evt.target.dataset.username;
+
+    const conhecimentos = [];
+    for (const cb of document.querySelectorAll('[name="editConhecimentos"]:checked')){
+      conhecimentos.push(cb.value);
+    }
+
+    const dados = {
+      nome: document.getElementById('editNome').value,
+      email: document.getElementById('editEmail').value,
+      telefone: document.getElementById('editTelefone').value,
+      dataNascimento: document.getElementById('editDataNascimento').value,
+      conhecimentos,
+    };
+
+    const resp = await fetch(`/pessoas/${username}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+
+    if (resp.ok){
+      alert('Pessoa alterada com sucesso!');
+      fecharFormEdicao();
+      document.getElementById('btnListar').click(); // recarrega a tabela
+    }else{
+      alert('Erro ao alterar: HTTP ' + resp.status);
+    }
+
+  });
+
+    async function excluirPessoa(username){
+      const confirmado = window.confirm(
+        `Deseja realmente excluir "${username}"?\nEsta ação não pode ser desfeita.`
+      );
+      if (!confirmado)return;
+
+      const resp = await fetch(`/pessoas/${username}`, { method: 'DELETE' });
+      if (resp.ok){
+        alert('Pessoa excluída com sucesso!');
+        document.getElementById('btnListar').click(); // recarrega a tabela
+      } else {
+        alert('Erro ao excluir: HTTP ' + resp.status);
+      }
+    }
 
 </script>
 </body>

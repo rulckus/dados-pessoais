@@ -64,6 +64,4 @@ public class PessoaAlteracaoDto {
 	public void setConhecimentos(List<String> conhecimentos) {
 		this.conhecimentos = conhecimentos;
 	}
-
-
 }
